@@ -11,6 +11,7 @@ class MovieController {
   MovieResponseModel movieResponseModel;
   MovieError movieError;
   bool loading = true;
+  int crossAxisCount = 2;
 
   List<MovieModel> get movies => movieResponseModel?.movies ?? <MovieModel>[];
   int get moviesCount => movies.length;
@@ -29,7 +30,7 @@ class MovieController {
           movieResponseModel = movie;
         } else {
           movieResponseModel.page = movie.page;
-          movieResponseModel.movies.addAll(movie.movies);
+          movieResponseModel.movies = movie.movies;
         }
       },
     );

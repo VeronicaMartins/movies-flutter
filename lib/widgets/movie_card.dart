@@ -1,3 +1,4 @@
+import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 
 class MovieCard extends StatelessWidget {
@@ -14,15 +15,8 @@ class MovieCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              'https://image.tmdb.org/t/p/w220_and_h330_face$posterPath',
-            ),
-            fit: BoxFit.cover,
-          ),
-        ),
+      child: FancyShimmerImage(
+        imageUrl: 'https://image.tmdb.org/t/p/w220_and_h330_face$posterPath',
       ),
     );
   }

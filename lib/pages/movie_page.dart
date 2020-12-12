@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:movies/models/movie_model.dart';
 import '../core/constants.dart';
 import 'movie_detail_page.dart';
 import '../widgets/centered_message.dart';
@@ -13,7 +15,9 @@ class MoviePage extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage> {
   final _controller = MovieController();
-  final _scrollController = ScrollController();
+  final _pagingController = PagingController<int, MovieModel>(
+    firstPageKey: 1,
+  );
   int lastPage = 1;
 
   @override
@@ -24,14 +28,12 @@ class _MoviePageState extends State<MoviePage> {
   }
 
   _initScrollListener() {
-    _scrollController.addListener(() async {
-      if (_scrollController.offset >=
-          _scrollController.position.maxScrollExtent) {
-        if (_controller.currentPage == lastPage) {
-          lastPage++;
-          await _controller.fetchAllMovies(page: lastPage);
-          setState(() {});
-        }
+    _pagingController.addPageRequestListener((pageKey) async {
+      await _controller.fetchAllMovies(page: pageKey);
+      if (pageKey == _controller.totalPages) {
+        _pagingController.appendLastPage(_controller.movies);
+      } else {
+        _pagingController.appendPage(_controller.movies, pageKey + 1);
       }
     });
   }
@@ -48,6 +50,16 @@ class _MoviePageState extends State<MoviePage> {
     });
   }
 
+  _initializeCrossAxis() async {
+    setState(() {
+      if (_controller.crossAxisCount == 2) {
+        _controller.crossAxisCount = 3;
+      } else {
+        _controller.crossAxisCount = 2;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,9 +72,10 @@ class _MoviePageState extends State<MoviePage> {
     return AppBar(
       title: Text(kAppName),
       actions: [
+        IconButton(icon: Icon(Icons.refresh), onPressed: _initialize),
         IconButton(
-          icon: Icon(Icons.refresh),
-          onPressed: _initialize,
+          icon: Icon(Icons.grid_on),
+          onPressed: _initializeCrossAxis,
         ),
       ],
     );
@@ -77,22 +90,22 @@ class _MoviePageState extends State<MoviePage> {
       return CenteredMessage(message: _controller.movieError.message);
     }
 
-    return GridView.builder(
-      controller: _scrollController,
+    return PagedGridView<int, MovieModel>(
+      pagingController: _pagingController,
       padding: const EdgeInsets.all(2.0),
-      itemCount: _controller.moviesCount,
+      builderDelegate: PagedChildBuilderDelegate(
+        itemBuilder: _buildMovieCard,
+      ),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+        crossAxisCount: _controller.crossAxisCount,
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
         childAspectRatio: 0.65,
       ),
-      itemBuilder: _buildMovieCard,
     );
   }
 
-  Widget _buildMovieCard(context, index) {
-    final movie = _controller.movies[index];
+  Widget _buildMovieCard(context, movie, index) {
     return MovieCard(
       posterPath: movie.posterPath,
       onTap: () => _openDetailPage(movie.id),

@@ -1,3 +1,4 @@
+import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 
 import '../controllers/movie_detail_controller.dart';
@@ -5,6 +6,8 @@ import '../widgets/centered_message.dart';
 import '../widgets/centered_progress.dart';
 import '../widgets/chip_date.dart';
 import '../widgets/rate.dart';
+import '../widgets/imdb_id.dart';
+import '../widgets/runtime.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final int movieId;
@@ -82,19 +85,24 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   _buildStatus() {
     return Container(
       padding: const EdgeInsets.all(10.0),
-      child: Row(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Rate(_controller.movieDetail.voteAverage),
-          ChipDate(date: _controller.movieDetail.releaseDate),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Rate(_controller.movieDetail.voteAverage),
+            ChipDate(date: _controller.movieDetail.releaseDate),
+          ]),
+          ImdbId(_controller.movieDetail.imdbId),
+          Runtime(_controller.movieDetail.runtime),
         ],
       ),
     );
   }
 
   _buildCover() {
-    return Image.network(
-      'https://image.tmdb.org/t/p/w500${_controller.movieDetail.backdropPath}',
+    return FancyShimmerImage(
+      imageUrl:
+          'https://image.tmdb.org/t/p/w500${_controller.movieDetail.backdropPath}',
     );
   }
 }

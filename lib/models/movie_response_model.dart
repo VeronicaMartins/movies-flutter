@@ -6,7 +6,7 @@ class MovieResponseModel {
   int page;
   final int totalResults;
   final int totalPages;
-  final List<MovieModel> movies;
+  List<MovieModel> movies;
 
   MovieResponseModel({
     this.page,
